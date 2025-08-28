@@ -127,7 +127,7 @@ import Test from "../models/test.model.js";
 (async () => {
   try {
     await mongoose.connect(
-      "mongodb+srv://udemycourse03620:l1OqzzjKT7wmrbrw@cluster0.xeqlqao.mongodb.net/MediLab"
+     process.env.MONGODB_URI
     );
     console.log("Connected to MongoDB");
     await Test.insertMany(tests);
