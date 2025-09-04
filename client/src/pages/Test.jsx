@@ -5,8 +5,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getTestdetails } from "../services/test";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../services/cart";
-import { addTestInCart } from "../features/cartSlice";
+import { savedPatientDetails } from "../services/patient";
+import { addTestInCart, removeTestFromCart } from "../features/cartSlice";
 import Chatbot from "../components/Chatbot";
+import { setPatients } from "../features/patientSlice";
+import { setTests } from "../features/orderSlice";
+import socket from "../utils/socket";
 function Test() {
   const [test, setTest] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -16,6 +20,7 @@ function Test() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const savedPatients = useSelector(state => state.patients.patients);
   const fetchTest = async () => {
     try {
       setLoading(true);
@@ -29,14 +34,31 @@ function Test() {
     }
   };
 
-
+  const fetchSavedPatientsDetails = async () => {
+    try {
+      const patients = await savedPatientDetails(user._id);
+      dispatch(setPatients([patients]));
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   useEffect(() => {
     fetchTest();
+    fetchSavedPatientsDetails();
+    socket.on("testDeleted", (deletedTestId) => {
+      if (testId === deletedTestId) {
+        showError("This test is no longer available.");
+        navigate("/");
+        return;
+      }
+    })
+    return () => {
+      socket.off("testDeleted");
+    }
   }, []);
 
   const inCart = test && cartItems.some((x) => x._id === test._id);
-
   const toggleAccordion = (section) => {
     setActiveAccordion(activeAccordion === section ? null : section);
   };
@@ -55,6 +77,20 @@ function Test() {
       showError("Failed to add test to cart. Please try again.");
     }
   };
+
+  const handleBookNow = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    dispatch(addTestInCart(test));
+    if (savedPatients.length > 0) {
+      navigate("/select-patient/1");
+    } else {
+      navigate("/patient-details/1");
+    }
+    return;
+  }
 
   return (
     <div className="min-h-screen bg-white px-6 py-10">
@@ -107,20 +143,12 @@ function Test() {
 
               {/* Book Now */}
               <button
-                onClick={() =>
-                  user ? navigate(`/select-patient/1`) : navigate("/login")
-                }
+                onClick={handleBookNow}
                 className="px-6 py-2.5 rounded-xl font-semibold bg-blue-600 text-white shadow-md hover:bg-blue-700 hover:shadow-lg active:scale-95 transition-transform duration-150 ease-in-out"
               >
                 Book Now
               </button>
             </div>
-
-            {/* <div className="bg-white border rounded-lg p-4 shadow-sm">
-              <h2 className="font-semibold text-gray-900 mb-3">
-                💬 Ask About This Test
-              </h2>
-            </div> */}
             <Chatbot testId={test._id} />
 
             {/* Highlights */}
@@ -227,20 +255,76 @@ function Test() {
 
           {/* Right Section: Cart/Help Box */}
           <div className="space-y-6">
-            <div className="border rounded-lg shadow-sm p-4">
-              <h2 className="font-semibold text-gray-900 mb-2">Your Cart</h2>
-              <p className="text-sm text-gray-500 mb-3">
-                {cartItems.length} Tests
-              </p>
-              <button
-                className={`w-full py-2 rounded-md font-semibold ${cartItems.length > 0
-                  ? "text-white bg-blue-700"
-                  : "cursor-not-allowed  bg-gray-200 text-gray-500"
-                  }`}
-              >
-                Proceed to Checkout
-              </button>
+            <div className="border rounded-lg shadow-sm p-4 bg-gray-50">
+              {/* Header */}
+              <h2 className="font-semibold text-gray-900 mb-1">Your Cart</h2>
+              <p className="text-sm text-gray-500 mb-4">{cartItems.length} Tests</p>
+
+              {/* Cart Items */}
+              <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                {cartItems.map((test, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-gray-200"
+                  >
+                    {/* Left: Test Info */}
+                    <div>
+                      <p className="text-base font-semibold text-gray-800">{test.testname}</p>
+                      <p className="text-sm text-gray-500">Preparation: {test.preparation || "None"}</p>
+
+                    </div>
+
+                    {/* Right: Price + Remove */}
+                    <div className="text-right">
+                      <p className="text-lg font-bold text-indigo-600">₹{test.price}</p>
+                      <button
+                        onClick={() => dispatch(removeTestFromCart(test._id))}
+                        className="mt-2 px-3 py-1 text-sm text-white bg-red-500 rounded-md hover:bg-red-600 transition"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Summary */}
+              {cartItems.length > 0 && (
+                <div className="mt-4 border-t pt-3">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-base font-medium text-gray-700">Pick up charges</p>
+                    <p className="text-lg font-bold text-indigo-600">
+                      ₹0
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-base font-medium text-gray-700">Total</p>
+                    <p className="text-lg font-bold text-indigo-600">
+                      ₹{cartItems.reduce((total, item) => total + item.price, 0)}
+                    </p>
+                  </div>
+
+                  <button
+                    className={`w-full py-2 rounded-md font-semibold transition ${cartItems.length > 0
+                      ? "text-white bg-blue-700 hover:bg-blue-800"
+                      : "cursor-not-allowed bg-gray-200 text-gray-500"
+                      }`}
+                    onClick={() => {
+                      if (cartItems.length > 0) {
+                        user ? navigate(`/select-patient/1`) : navigate("/login");
+                        dispatch(setTests(cartItems)); // ✅ pass all cart items, not single "test"
+                      }
+                    }}
+                    disabled={cartItems.length === 0}
+                  >
+                    Proceed to Checkout
+                  </button>
+                </div>
+              )}
             </div>
+
+
+
 
             <div className="bg-blue-50 border rounded-lg p-4">
               <p className="font-semibold text-gray-900 mb-2">
@@ -259,6 +343,7 @@ function Test() {
           </div>
         </div>
       )}
+
     </div>
   );
 }

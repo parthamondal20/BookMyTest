@@ -3,7 +3,10 @@ import Stepper from "../components/Stepper";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { addPatient } from "../features/orderSlice";
-import { getUserAddressess } from "../services/user";
+import { getUserAddressess } from "../services/patient";
+import { setAddress } from "../features/addressSlice";
+import Loader from "../components/Loader";
+import { showLoader, hideLoader } from "../features/loaderSlice";
 export default function PatientDetails() {
   const user = useSelector((state) => state.auth.user);
   const [day, setDay] = useState("");
@@ -15,14 +18,10 @@ export default function PatientDetails() {
   const [ageError, setAgeError] = useState("");
   const [genderError, setGenderError] = useState("");
 
-  const [addressess, setAddressess] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
-
+  const allAddress = useSelector(state => state.address.address);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const calculateAge = (dobString) =>
@@ -33,6 +32,20 @@ export default function PatientDetails() {
     setAgeError(null);
     setGenderError(null);
   }, [day, month, year, gender]);
+
+  const fetchPatientAddress = async () => {
+    try {
+      const patientAddress = await getUserAddressess(user._id);
+      console.log(patientAddress);
+      dispatch(setAddress(patientAddress));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  useEffect(() => {
+    fetchPatientAddress();
+  }, []);
+
 
   const handleContinue = () => {
     if (!day || !month || !year) {
@@ -81,7 +94,11 @@ export default function PatientDetails() {
         mobileNo: mobileNo,
       };
       dispatch(addPatient(patient));
-      navigate(`/patient-address/2`);
+      if (allAddress.length >= 0) {
+        navigate("/patient-address/2");
+      } else {
+        navigate(`/patient-address/2`);
+      }
     }
   };
 

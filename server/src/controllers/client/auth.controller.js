@@ -1,8 +1,8 @@
-import User from "../models/user.model.js";
-import asyncHandler from "./../utils/asyncHandler.js";
-import ApiError from "../utils/apiError.js";
-import ApiResponse from "../utils/apiResponse.js";
-import generateAccessAndRefreshToken from "../utils/generateAccessAndRefreshToken.js";
+import User from "../../models/user.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import ApiError from "../../utils/apiError.js";
+import ApiResponse from "../../utils/apiResponse.js";
+import generateAccessAndRefreshToken from "../../utils/generateAccessAndRefreshToken.js";
 const registerUser = asyncHandler(async (req, res) => {
   const { username, mobileNo, password } = req.body;
   if (!username || !mobileNo || !password) {
@@ -30,7 +30,6 @@ const registerUser = asyncHandler(async (req, res) => {
     maxAge: 10 * 24 * 60 * 60 * 1000,
   };
   return res
-    .cookie("refreshToken", refreshToken, options)
     .cookie("accessToken", accessToken, options)
     .status(201)
     .json(new ApiResponse(201, "user registered successfully", newUser));
@@ -62,7 +61,6 @@ const loginUser = asyncHandler(async (req, res) => {
     maxAge: 10 * 24 * 60 * 60 * 1000,
   };
   return res
-    .cookie("refreshToken", refreshToken, options)
     .cookie("accessToken", accessToken, options)
     .status(201)
     .json(new ApiResponse(201, "User loggedIn successfully", newUser));
@@ -90,7 +88,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     maxAge: 10 * 24 * 60 * 60 * 1000,
   };
   return res
-    .cookie("refreshToken", refreshToken, options)
     .cookie("accessToken", accessToken, options)
     .status(200)
     .json(new ApiResponse(200, "Access token refreshed successfully"));
@@ -114,7 +111,6 @@ const logoutUser = asyncHandler(async (req, res) => {
   );
 
   return res
-    .clearCookie("refreshToken")
     .clearCookie("accessToken")
     .status(200)
     .json(new ApiResponse(200, "User logged out successfully"));

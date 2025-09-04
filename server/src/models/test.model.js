@@ -13,7 +13,6 @@ const testSchema = new Schema(
     },
     shortDescription: {
       type: String,
-      required: true,
       trim: true,
     },
     preparation: {
@@ -39,9 +38,8 @@ const testSchema = new Schema(
       required: true,
     },
     lab: {
-      type: Schema.Types.ObjectId,
-      ref: "Lab",
-      required: true,
+      type: String,
+      // required: true,
     },
   },
   {

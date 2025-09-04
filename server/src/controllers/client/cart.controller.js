@@ -1,7 +1,7 @@
-import asyncHandler from "../utils/asyncHandler.js";
-import ApiError from "../utils/apiError.js";
-import apiResponse from "../utils/apiResponse.js";
-import Cart from "../models/cart.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import ApiError from "../../utils/apiError.js";
+import apiResponse from "../../utils/apiResponse.js";
+import Cart from "../../models/cart.model.js";
 const addToCart = asyncHandler(async (req, res) => {
   const { userId, testId } = req.body;
   if (!userId || !testId) {

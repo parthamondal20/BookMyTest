@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import { StrictMode, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import store from "./app/store";
@@ -11,17 +11,21 @@ import {
 import "./index.css";
 import Layout from "./Layout";
 //components
-import Home from "./components/Home";
-//pages
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Test from "./pages/Test";
-import PatientDetails from "./pages/PatientDetails";
-import NotFound from "./pages/NotFound";
-import Cart from "./pages/Cart";
-import PatientSelector from "./pages/PatientSelector";
-import SelectAddress from "./pages/SelectAddress";
-import AddressForm from "./pages/AddressForm";
+
+import Loader from "./components/Loader";
+
+const Home = lazy(() => import("./components/Home"));
+const Login = lazy(() => import("./pages/Login"));
+const Register = lazy(() => import("./pages/Register"));
+const Test = lazy(() => import("./pages/Test"));
+const PatientDetails = lazy(() => import("./pages/PatientDetails"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const Cart = lazy(() => import("./pages/Cart"));
+const PatientSelector = lazy(() => import("./pages/PatientSelector"));
+const SelectAddress = lazy(() => import("./pages/SelectAddress"));
+const AddressForm = lazy(() => import("./pages/AddressForm"));
+const TimeSlotPage = lazy(() => import("./pages/TimeSlotPage"));
+const PaymentPage = lazy(() => import("./pages/PaymentPage"));
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
@@ -33,6 +37,9 @@ const router = createBrowserRouter(
       <Route path="select-patient/:step" element={<PatientSelector />} />
       <Route path="patient-details/:step" element={<PatientDetails />} />
       <Route path="/patient-address/:step" element={<AddressForm />} />
+      <Route path="/select-address/:step" element={<SelectAddress />} />
+      <Route path="/patient-time-slot/:step" element={<TimeSlotPage />} />
+      <Route path="/payment-details" element={<PaymentPage />} />
       <Route path="*" element={<NotFound />} />
     </Route>
   )
@@ -40,7 +47,9 @@ const router = createBrowserRouter(
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
-      <RouterProvider router={router} />
+      <Suspense fallback={<Loader />}>
+        <RouterProvider router={router} />
+      </Suspense>
     </Provider>
   </StrictMode>
 );

@@ -5,9 +5,9 @@ import { getUserCart, removeFromCart } from "../services/cart";
 import Loader from "../components/Loader";
 import { showError, showSuccess } from "../utils/toast";
 import { removeTestFromCart } from "../features/cartSlice";
+import { showLoader, hideLoader } from "../features/loaderSlice.js";
 function Cart() {
   const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.auth.user);
   const cart = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
@@ -21,13 +21,13 @@ function Cart() {
 
   const fetchCart = async () => {
     try {
-      setLoading(true);
+      dispatch(showLoader());
       const cart = await getUserCart(user._id);
       setCartItems(cart);
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
+      dispatch(hideLoader());
     }
   };
 
@@ -50,8 +50,7 @@ function Cart() {
 
   return (
     <>
-      <Loader isVisible={loading} />
-
+      <Loader />
       {cartItems.length > 0 ? (
         <div className="min-h-screen bg-gray-50 px-6 py-10">
           <div className="max-w-6xl mx-auto">

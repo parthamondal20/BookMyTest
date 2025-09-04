@@ -1,7 +1,7 @@
-import Test from "../models/test.model.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import ApiResponse from "../utils/apiResponse.js";
-import ApiError from "../utils/apiError.js";
+import Test from "../../models/test.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import ApiResponse from "../../utils/apiResponse.js";
+import ApiError from "../../utils/apiError.js";
 const getAllTests = asyncHandler(async (req, res) => {
   const tests = await Test.find({});
   return res

@@ -5,7 +5,7 @@ import {
   getUserCart,
   mergeCart,
   removeFromCart,
-} from "../controllers/cart.controller.js";
+} from "../../controllers/client/cart.controller.js";
 router.post("/add-to-cart", addToCart);
 router.get("/get-cart/:userId", getUserCart);
 router.post("/remove-from-cart", removeFromCart);

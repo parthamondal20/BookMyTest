@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getTests } from "../services/test.js";
 import Loader from "./Loader.jsx";
+import { useDispatch } from "react-redux";
+import { showLoader, hideLoader } from "../features/loaderSlice.js";
 import { useNavigate } from "react-router-dom";
+import socket from "../utils/socket.js";
 const healthConcerns = [
   {
     name: "Fever",
@@ -27,29 +30,48 @@ const healthConcerns = [
 ];
 
 const Home = () => {
-  const [loading, setLoading] = useState(false);
   const [tests, setTests] = useState([]);
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
   const fetchTests = async () => {
     try {
-      setLoading(true);
+      dispatch(showLoader());
       const testsResponse = await getTests();
       setTests(testsResponse);
     } catch (error) {
       console.log("Error fetching tests:", error);
     } finally {
-      setLoading(false);
+      dispatch(hideLoader());
     }
   };
 
   useEffect(() => {
     fetchTests();
+    socket.on("testUpdated", (updatedTest) => {
+      setTests((prev) =>
+        prev.map((t) => (t._id === updatedTest._id ? updatedTest : t))
+      );
+    });
+
+    socket.on("testAdded", (newTest) => {
+      setTests((prev) => [...prev, newTest]);
+    });
+
+    socket.on("testDeleted", (deletedId) => {
+      setTests((prev) => prev.filter((t) => t._id !== deletedId));
+    });
+
+    // Cleanup listeners when component unmounts
+    return () => {
+      socket.off("testUpdated");
+      socket.off("testAdded");
+      socket.off("testDeleted");
+    };
   }, []);
 
   return (
     <>
-      <Loader isVisible={loading} />
+      <Loader />
       <main className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-blue-100 px-6 py-12">
         {/* Hero Section */}
         <section className="w-full max-w-7xl mx-auto bg-gradient-to-r from-blue-600 to-blue-500 rounded-3xl shadow-lg px-10 py-12 mb-16 flex flex-col md:flex-row items-center justify-between gap-10 text-white">

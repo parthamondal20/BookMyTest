@@ -124,14 +124,16 @@ const tests = [
 ];
 
 import Test from "../models/test.model.js";
+import Patient from "../models/patient.model.js";
 (async () => {
   try {
     await mongoose.connect(
       "mongodb+srv://udemycourse03620:l1OqzzjKT7wmrbrw@cluster0.xeqlqao.mongodb.net/MediLab"
     );
-    console.log("Connected to MongoDB");
-    await Test.insertMany(tests);
-    console.log("Test data seeded successfully");
+    // console.log("Connected to MongoDB");
+    // await Test.insertMany(tests);
+    // console.log("Test data seeded successfully");
+    await Patient.create({});
     process.exit(0);
   } catch (error) {
     console.error("Error seeding test data:", error);

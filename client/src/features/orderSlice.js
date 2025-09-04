@@ -9,8 +9,12 @@ const orderSlice = createSlice({
   name: "order",
   initialState,
   reducers: {
-    addTests: (state, action) => {
+    setTests: (state, action) => {
       state.tests = action.payload;
+    },
+    removeTest: (state, action) => {
+      const id = action.payload;
+      state.tests = state.tests.filter((test) => test._id !== id);
     },
     addPatient: (state, action) => {
       state.patient = action.payload;
@@ -19,11 +23,11 @@ const orderSlice = createSlice({
       state.address = action.payload;
     },
     addTimeSlot: (state, action) => {
-      state.address = action.payload;
+      state.timeslot = action.payload;
     },
   },
 });
 
-export const { addTests, addAddress, addPatient, addTimeSlot } =
+export const { setTests, addAddress, addPatient, addTimeSlot } =
   orderSlice.actions;
 export default orderSlice.reducer;

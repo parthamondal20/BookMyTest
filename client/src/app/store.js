@@ -3,6 +3,8 @@ import authReducer from "../features/authSlice.js";
 import cartReducer from "../features/cartSlice.js";
 import orderReducer from "../features/orderSlice.js";
 import addressReducer from "../features/addressSlice.js";
+import loaderReducer from "../features/loaderSlice.js";
+import patientsReducer from "../features/patientSlice.js";
 const saveState = (state) => {
   localStorage.setItem("reduxState", JSON.stringify(state));
 };
@@ -20,6 +22,8 @@ const store = configureStore({
     cart: cartReducer,
     order: orderReducer,
     address: addressReducer,
+    loader: loaderReducer,
+    patients: patientsReducer,
   },
   preloadedState,
 });
@@ -30,6 +34,7 @@ store.subscribe(() => {
     cart: store.getState().cart,
     order: store.getState().order,
     address: store.getState().address,
+    patients: store.getState().patients,
   });
 });
 

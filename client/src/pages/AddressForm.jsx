@@ -1,8 +1,13 @@
 import { useState } from "react";
 import { Navigation, Loader2 } from "lucide-react";
 import Stepper from "../components/Stepper";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addAddress } from "../features/orderSlice";
+import { saveUserAddress } from "../services/patient";
+import { useNavigate } from "react-router-dom";
+import CartSummery from "../components/sideCartSummery";
+import { generateAddressFromCoords } from "../services/geolocation";
+import { showError } from "../utils/toast";
 export default function AddressForm() {
     const [form, setForm] = useState({
         pincode: "",
@@ -11,7 +16,9 @@ export default function AddressForm() {
         city: "",
         type: "Home",
     });
+    const { user } = useSelector(state => state.auth);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 
     const handleChange = (e) => {
@@ -21,29 +28,60 @@ export default function AddressForm() {
 
     const handleSubmit = async () => {
         try {
-            
+            await saveUserAddress(user._id, form);
+            dispatch(addAddress(form));
+            navigate("/patient-time-slot/3");
         } catch (error) {
-
+            console.log(error);
         }
-        console.log("Address saved:", form);
     };
 
     const handleUseLocation = async () => {
+
+        if (!navigator.geolocation) {
+            showError("Geolocation is not supported by your browser.");
+            return;
+        }
+
+
         setIsLoadingLocation(true);
-        setTimeout(() => {
-            setForm(prev => ({
-                ...prev,
-                pincode: "560001",
-                city: "Bangalore",
-                addressLine: "Detected from GPS"
-            }));
-            setIsLoadingLocation(false);
-        }, 2000);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const data = await generateAddressFromCoords(latitude, longitude);
+                    setForm((prev) => (
+                        {
+                            ...prev,
+                            addressLine: data.display_name || "Detected from GPS",
+                            pincode: data.address.postcode || "000000",
+                            city: data.address.city || data.address.town || data.address.village || "",
+                            landmark:
+                                data.address.road ||
+                                data.address.suburb ||
+                                data.address.neighbourhood ||
+                                "Near landmark not found",
+                        }
+                    ));
+                } catch (error) {
+                    console.log(error);
+                    showError("Unable to fetch you location.Type the address manually");
+                } finally {
+                    setIsLoadingLocation(false);
+                }
+            },
+            (error) => {
+                console.log(error);
+                showError("Unable to retrieve your location.");
+                setIsLoadingLocation(false);
+            }
+        )
     };
 
     return (
         <>
             <Stepper />
+            <CartSummery />
             <div className="min-h-screen  flex items-center justify-center p-6">
                 <div className="w-full max-w-lg">
                     {/* Card */}

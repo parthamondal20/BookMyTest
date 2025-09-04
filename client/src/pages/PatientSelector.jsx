@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserCircle, Plus } from "lucide-react";
 import Stepper from "../components/Stepper";
+import { addPatient } from "../features/orderSlice";
+import { useDispatch } from "react-redux";
+import CartSummery from "../components/sideCartSummery";
 const savedPatients = [
   { id: 1, name: "Rahul Sharma", gender: "Male", dob: "1990-05-15" },
   { id: 2, name: "Neha Sharma", gender: "Female", dob: "1992-03-10" },
@@ -10,13 +13,16 @@ const savedPatients = [
 
 export default function PatientSelector() {
   const [selectedPatient, setSelectedPatient] = useState(null);
+
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   return (
     <div className="w-full max-w-3xl mx-auto mt-10 px-4">
       {/* Stepper */}
       <div className="w-full max-w-4xl">
         <Stepper />
       </div>
+      <CartSummery/>
       <h2 className="text-2xl font-bold text-gray-800 mt-6 mb-6 text-center">
         Select Patient
       </h2>
@@ -26,19 +32,19 @@ export default function PatientSelector() {
         {savedPatients.map((patient) => (
           <div
             key={patient.id}
-            onClick={() => setSelectedPatient(patient)}
-            className={`flex items-center gap-4 p-5 rounded-2xl border shadow-sm cursor-pointer transition-all ${
-              selectedPatient?.id === patient.id
-                ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
-                : "border-gray-200 hover:border-blue-400 hover:shadow-md"
-            }`}
+            onClick={() => {
+              setSelectedPatient(patient)
+            }}
+            className={`flex items-center gap-4 p-5 rounded-2xl border shadow-sm cursor-pointer transition-all ${selectedPatient?.id === patient.id
+              ? "border-blue-600 bg-blue-50 ring-2 ring-blue-200"
+              : "border-gray-200 hover:border-blue-400 hover:shadow-md"
+              }`}
           >
             <UserCircle
-              className={`w-12 h-12 ${
-                selectedPatient?.id === patient.id
-                  ? "text-blue-600"
-                  : "text-gray-500"
-              }`}
+              className={`w-12 h-12 ${selectedPatient?.id === patient.id
+                ? "text-blue-600"
+                : "text-gray-500"
+                }`}
             />
             <div>
               <p className="font-semibold text-gray-900">{patient.name}</p>
@@ -72,7 +78,12 @@ export default function PatientSelector() {
       {/* Continue Button */}
       {selectedPatient && (
         <div className="mt-6 mb-6 text-center">
-          <button className="px-8 py-3 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700 transition">
+          <button
+            onClick={() => {
+              dispatch(addPatient(selectedPatient));
+              navigate("/select-address/2");
+            }}
+            className="px-8 py-3 bg-blue-600 text-white rounded-xl shadow-md hover:bg-blue-700 transition">
             Continue
           </button>
         </div>

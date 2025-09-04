@@ -1,9 +1,9 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import Test from "../models/test.model.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import ApiError from "../utils/apiError.js";
-import ApiResponse from "../utils/apiResponse.js";
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+import Test from "../../models/test.model.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import ApiError from "../../utils/apiError.js";
+import ApiResponse from "../../utils/apiResponse.js";
+const genAI = new GoogleGenerativeAI("AIzaSyBNi8vpoBtUYUtzjr4zxvJ-Jibi5-dUdiA");
 const chatbot = asyncHandler(async (req, res) => {
   const { testId, question } = req.body;
 

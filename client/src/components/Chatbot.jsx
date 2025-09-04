@@ -22,6 +22,7 @@ export default function Chatbot({ testId }) {
         ...newMsgs,
         { role: "assistant", content: "Oops, something went wrong." },
       ]);
+      console.log(err);
     }
   };
 
@@ -67,11 +68,10 @@ export default function Chatbot({ testId }) {
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={`p-2 rounded-lg max-w-[80%] break-words ${
-                  m.role === "user"
-                    ? "bg-blue-100 self-end ml-auto"
-                    : "bg-gray-100 self-start mr-auto"
-                }`}
+                className={`p-2 rounded-lg max-w-[80%] break-words ${m.role === "user"
+                  ? "bg-blue-100 self-end ml-auto"
+                  : "bg-gray-100 self-start mr-auto"
+                  }`}
               >
                 {m.content}
               </div>
