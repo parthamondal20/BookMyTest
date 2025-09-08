@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { CreditCard, Smartphone, Wallet, Banknote, Globe } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { showLoader, hideLoader } from "../features/loaderSlice";
+import Loader from "../components/Loader";
+import { createRazorpayOrder } from "../services/payment";
+import { saveOrder } from "../services/order";
+import { showSuccess, showError } from "../utils/toast.js";
 export default function PaymentPage() {
     const [method, setMethod] = useState("card");
+    const dispatch = useDispatch();
+    const order = useSelector(state => state.order);
+    const user = useSelector(state => state.auth.user);
     const methods = [
         { id: "card", name: "Debit / Credit Card", icon: <CreditCard size={18} /> },
         { id: "upi", name: "UPI", icon: <Smartphone size={18} /> },
@@ -12,21 +20,57 @@ export default function PaymentPage() {
     ];
 
     const handlePay = async () => {
-        const options = {
-            key: "rzp_test_xxxxxxxx",
-            amount: order.amount,
-            currency: "INR",
-            name: "MyShop",
-            description: "Order Payment",
-            order_id: order.id,
-            handler: (response) => {
-                alert("Payment Successful: " + response.razorpay_payment_id);
-            },
-            theme: { color: "#4F46E5" },
-        };
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+
+        try {
+            dispatch(showLoader());
+            const amount = order.tests.reduce((acc, item) => acc + item.price, 0);
+            const data = await createRazorpayOrder(amount);
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_API_KEY,
+                amount: data.amount,
+                currency: "INR",
+                name: "Global Lab",
+                description: "Order Payment",
+                order_id: data.id,
+                handler: async (response) => {
+                    try {
+                        const paymentData = {
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                        }
+
+                        const orderDetails = {
+                            user: user._id,
+                            patient: order.patient,
+                            address: order.address,
+                            tests: order.tests,
+                            timeslot: order.timeslot,
+                        }
+
+                        await saveOrder(orderDetails, paymentData);
+                        showSuccess("Order confirmed");
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }, prefill: {
+                    name: user.username,
+                    email: user.mobileNo,
+                    contact: "9999999999",
+                },
+                theme: { color: "#4F46E5" },
+            };
+            const rzp = new window.Razorpay(options);
+            rzp.open();
+        } catch (error) {
+            console.log(error);
+            showError("Payment Failed!");
+        } finally {
+            dispatch(hideLoader());
+        }
     };
+
+   
 
     return (
         <div className="max-w-4xl mx-auto p-4">
@@ -46,8 +90,8 @@ export default function PaymentPage() {
                     <p>₹900.00</p>
                 </div>
             </div> */}
-
-            {/* Payment Options */}
+            <Loader message={"Order is processing..."} />
+            {/* Payment Options
             <div className="bg-white shadow rounded-2xl overflow-hidden">
                 {methods.map((m) => (
                     <div
@@ -63,7 +107,7 @@ export default function PaymentPage() {
             </div>
 
             {/* Payment Details */}
-            <div className="bg-white shadow rounded-2xl p-4 mt-6">
+            {/* <div className="bg-white shadow rounded-2xl p-4 mt-6">
                 {method === "card" && (
                     <div>
                         <h3 className="font-medium mb-3">Pay using Card</h3>
@@ -91,9 +135,9 @@ export default function PaymentPage() {
                             <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Paytm_logo.png" alt="Paytm" className="h-8" />
                         </div>
                     </div>
-                )}
+                )} */}
 
-                {method === "wallet" && (
+            {/* {method === "wallet" && (
                     <div>
                         <h3 className="font-medium mb-3">Select Wallet</h3>
                         <p className="text-gray-600">Wallets like Paytm, PhonePe will be available.</p>
@@ -112,16 +156,16 @@ export default function PaymentPage() {
                         <h3 className="font-medium mb-3">Cash on Delivery</h3>
                         <p className="text-gray-600">Pay in cash when your order arrives.</p>
                     </div>
-                )}
+                )} */}
 
-                {/* Pay Button */}
-                <button
-                    onClick={handlePay}
-                    className="w-full mt-6 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
-                >
-                    Pay Now
-                </button>
-            </div>
+            {/* Pay Button */}
+            <button
+                onClick={handlePay}
+                className="w-full mt-6 bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+            >
+                Pay Now
+            </button>
+            {/* </div> */}
         </div>
     );
 }

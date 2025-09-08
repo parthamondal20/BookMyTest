@@ -28,8 +28,12 @@ io.on("connection", (socket) => {
 });
 
 export { io };
+
+import initAdmin from "./utils/initAdmin.js";
+
 connectDB()
-  .then(() => {
+  .then(async () => {
+    await initAdmin();
     server.listen(port, () => {
       console.log(`Server is running on port ${process.env.PORT}`);
     });

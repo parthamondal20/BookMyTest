@@ -149,7 +149,7 @@ const Header = () => {
             Features
           </Link>
           <Link
-            to="/contact"
+            to="/contact-page"
             className="text-blue-700 hover:text-blue-900 font-semibold transition"
           >
             Contact

@@ -31,6 +31,7 @@ const registerUser = asyncHandler(async (req, res) => {
   };
   return res
     .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .status(201)
     .json(new ApiResponse(201, "user registered successfully", newUser));
 });
@@ -62,6 +63,7 @@ const loginUser = asyncHandler(async (req, res) => {
   };
   return res
     .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .status(201)
     .json(new ApiResponse(201, "User loggedIn successfully", newUser));
 });
@@ -89,6 +91,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   };
   return res
     .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .status(200)
     .json(new ApiResponse(200, "Access token refreshed successfully"));
 });
@@ -112,6 +115,7 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   return res
     .clearCookie("accessToken")
+    .clearCookie("refreshToken")
     .status(200)
     .json(new ApiResponse(200, "User logged out successfully"));
 });

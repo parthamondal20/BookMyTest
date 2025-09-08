@@ -6,6 +6,11 @@ const orderSchema = new Schema(
       ref: "User",
       required: true,
     },
+    patient: {
+      type: Schema.Types.ObjectId,
+      ref: "Patient",
+      required: true,
+    },
 
     // Store both reference + snapshot
     address: {
@@ -14,7 +19,7 @@ const orderSchema = new Schema(
     },
     addressSnapshot: {
       type: Object, // Keeps backup of address details
-      required: true,
+      // required: true,
     },
     tests: [
       {
@@ -47,7 +52,15 @@ const orderSchema = new Schema(
       type: String,
       required: true,
       default: "pending",
-      enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+      enum: [
+        "pending",
+        "sample_collected",
+        "in_analysis",
+        "report_ready",
+        "completed",
+        "cancelled",
+        "rejected",
+      ],
     },
   },
   { timestamps: true } // auto adds createdAt, updatedAt

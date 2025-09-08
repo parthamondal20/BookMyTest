@@ -2,11 +2,12 @@ import Razorpay from "razorpay";
 import asyncHandler from "../../utils/asyncHandler.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/apiResponse.js";
+import dotenv from 'dotenv';
+dotenv.config();  
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_API_KEY,
   key_secret: process.env.RAZORPAY_API_SECRET,
 });
-
 const createRazorpayOrder = asyncHandler(async (req, res) => {
   const { amount } = req.body;
   const options = {

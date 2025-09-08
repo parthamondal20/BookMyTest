@@ -127,9 +127,7 @@ import Test from "../models/test.model.js";
 import Patient from "../models/patient.model.js";
 (async () => {
   try {
-    await mongoose.connect(
-     process.env.MONGODB_URI
-    );
+    await mongoose.connect(process.env.MONGODB_URI);
     // console.log("Connected to MongoDB");
     // await Test.insertMany(tests);
     // console.log("Test data seeded successfully");

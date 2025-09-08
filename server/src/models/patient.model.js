@@ -5,13 +5,8 @@ const patientSchema = new Schema(
     DOB: Date,
     age: Number,
     gender: String,
+    mobileNo:String,
     email: String,
-    address: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Address",
-      },
-    ],
   },
   {
     timestamps: true,

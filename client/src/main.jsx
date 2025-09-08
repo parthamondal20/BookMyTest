@@ -26,6 +26,7 @@ const SelectAddress = lazy(() => import("./pages/SelectAddress"));
 const AddressForm = lazy(() => import("./pages/AddressForm"));
 const TimeSlotPage = lazy(() => import("./pages/TimeSlotPage"));
 const PaymentPage = lazy(() => import("./pages/PaymentPage"));
+const ContactPage = lazy(() => import("./pages/ContactPage"));
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
@@ -36,10 +37,11 @@ const router = createBrowserRouter(
       <Route path="cart" element={<Cart />} />
       <Route path="select-patient/:step" element={<PatientSelector />} />
       <Route path="patient-details/:step" element={<PatientDetails />} />
-      <Route path="/patient-address/:step" element={<AddressForm />} />
-      <Route path="/select-address/:step" element={<SelectAddress />} />
-      <Route path="/patient-time-slot/:step" element={<TimeSlotPage />} />
-      <Route path="/payment-details" element={<PaymentPage />} />
+      <Route path="patient-address/:step" element={<AddressForm />} />
+      <Route path="select-address/:step" element={<SelectAddress />} />
+      <Route path="patient-time-slot/:step" element={<TimeSlotPage />} />
+      <Route path="payment-details" element={<PaymentPage />} />
+      <Route path="contact-page" element={<ContactPage />} />
       <Route path="*" element={<NotFound />} />
     </Route>
   )
